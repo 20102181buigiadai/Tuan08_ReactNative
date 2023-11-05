@@ -10,14 +10,88 @@ import {
 
 import { useState } from "react";
 
-export default function App({ navigation }) {
-  const [job, setJob] = useState("");
+export default function App({ navigation, route }) {
+  const [newjob, setJob] = useState("");
+  const { dataJob, idJob, name } = route.params;
+  const url = "https://nwhfql-8080.csb.app/Job";
+
+  function addJob() {
+    if (newjob.trim() === "") {
+      alert("Không được để trống công việc");
+    } else {
+      // Gửi yêu cầu GET để lấy danh sách công việc hiện tại của name
+      fetch(`${url}/?name=${encodeURIComponent(name)}`)
+        .then((response) => response.json())
+        .then((user) => {
+          // Lấy danh sách công việc từ user
+          const currentJobs = user.length > 0 ? user[0].jobs : [];
+          // Thêm công việc mới vào danh sách
+          const updatedJobs = [...currentJobs, newjob];
+          dataJob.push(newjob);
+          // Gửi yêu cầu PUT để cập nhật danh sách công việc mới lên server
+          fetch(`${url}/${user[0].id}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ jobs: updatedJobs, name: name })
+          })
+            .then(() => {
+              setJob("");
+            })
+            .catch((error) =>
+              console.error("Lỗi khi cập nhật công việc mới:", error)
+            );
+        })
+        .catch((error) =>
+          console.error("Lỗi khi lấy danh sách công việc hiện tại:", error)
+        );
+    }
+  }
+
+  function editJob() {
+    const indexToUpdate = dataJob.indexOf(idJob);
+    if (newjob.trim() === "") {
+      alert("Không được để trống công việc");
+    } else {
+      // Gửi yêu cầu GET để lấy danh sách công việc hiện tại của name
+      fetch(`${url}/?name=${encodeURIComponent(name)}`)
+        .then((response) => response.json())
+        .then((user) => {
+          // sửa
+          dataJob[indexToUpdate] = newjob;
+          // Gửi yêu cầu PUT để cập nhật danh sách công việc mới lên server
+          fetch(`${url}/${user[0].id}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ jobs: dataJob, name: name })
+          })
+            .then(() => {
+              setJob("");
+            })
+            .catch((error) =>
+              console.error("Lỗi khi cập nhật công việc mới:", error)
+            );
+        });
+    }
+  }
+
   return (
     <View style={styles.container}>
       {/* Title */}
       <View style={{ flex: 2, flexDirection: "row-reverse" }}>
         {/* Title Left */}
-        <TouchableOpacity style={{}} onPress={() => navigation.goBack()}>
+        <TouchableOpacity
+          style={{}}
+          onPress={() => {
+            navigation.navigate("API_Screen_02", {
+              name: name,
+              dataJob: dataJob
+            });
+          }}
+        >
           <Image
             style={{
               flex: 2,
@@ -47,7 +121,7 @@ export default function App({ navigation }) {
               style={{ fontSize: 20, fontWeight: 700, textAlign: "center" }}
             >
               {" "}
-              Hi Mariadb
+              Hi {name}
             </Text>
             <Text style={{ fontSize: 14, fontWeight: 700, color: "#9095A0" }}>
               Have agratet day a head
@@ -97,6 +171,7 @@ export default function App({ navigation }) {
             onChangeText={(text) => {
               setJob(text);
             }}
+            value={newjob}
           ></TextInput>
         </View>
       </View>
@@ -117,7 +192,11 @@ export default function App({ navigation }) {
             borderRadius: 10
           }}
           onPress={() => {
-            navigation.navigate("API_Screen_02", { name: name });
+            if (idJob.trim() == "") {
+              addJob();
+            } else {
+              editJob();
+            }
           }}
         >
           <Text style={{ color: "white", textAlign: "center" }}>
@@ -125,7 +204,7 @@ export default function App({ navigation }) {
           </Text>
         </TouchableOpacity>
       </View>
-      <View style={{ flex: 6,justifyContent:"center" }}>
+      <View style={{ flex: 6, justifyContent: "center" }}>
         <Image
           style={{ width: 190, height: 170 }}
           source={require("../assets/Image 95.png")}

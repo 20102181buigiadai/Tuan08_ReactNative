@@ -11,6 +11,47 @@ import {
 
 export default function App({ navigation }) {
   const [name, setName] = useState("");
+  // URL
+  const url = "https://nwhfql-8080.csb.app/Job";
+
+  const checkLogin = () => {
+    if (name.trim() == "") {
+      alert("Không được để trống name");
+    } else {
+      fetch(`${url}/?name=${encodeURIComponent(name)}`)
+        .then((response) => response.json())
+        .then((jobs) => {
+          if (jobs.length == 0) {
+            addUser();
+          } else {
+            navigation.navigate("API_Screen_02", { name: name, dataJob: jobs });
+          }
+        })
+        .catch((error) => console.error("Lỗi:", error));
+    }
+  };
+
+  function addUser() {
+    //api tự động nhảy số id = id cũ +1
+    const newUser = {
+      // id:idold+1
+      name: name,
+      jobs: []
+    };
+    fetch(`${url}/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(newUser)
+    })
+      .then((response) => response.json())
+      .then((newUserData) => {
+        navigation.push("API_Screen_02", { name: name, dataJob: [] });
+      })
+      .catch((error) => console.error("Lỗi thêm người dùng:", error));
+  }
+
   return (
     <View style={styles.container}>
       <View
@@ -55,6 +96,7 @@ export default function App({ navigation }) {
         <TextInput
           style={{ flex: 9 }}
           placeholder="Enter your name"
+          value={name}
           onChangeText={(text) => {
             setName(text);
           }}
@@ -76,9 +118,7 @@ export default function App({ navigation }) {
             justifyContent: "center",
             borderRadius: 10
           }}
-          onPress={() => {
-            navigation.navigate("API_Screen_02",{name: name});
-          }}
+          onPress={() => checkLogin()}
         >
           <Text style={{ color: "white", textAlign: "center" }}>
             GET STARTED {"->"}
