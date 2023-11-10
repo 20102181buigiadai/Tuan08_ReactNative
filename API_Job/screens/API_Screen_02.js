@@ -20,7 +20,6 @@ export default function App({ navigation, route }) {
   // Hàm lấy id của người dùng dựa trên tên
   const getUserIdByName = (userName) => {
     const user = jobs.find((user) => user.name === userName);
-
     return user ? user.id : null;
   };
 
@@ -104,7 +103,11 @@ export default function App({ navigation, route }) {
                 marginBottom: 10
               }}
               onPress={() =>
-                navigation.navigate("API_Screen_03", { name: name, dataJob: jobs,idJob:item })
+                navigation.navigate("API_Screen_03", {
+                  name: name,
+                  dataJob: jobs,
+                  idJob: item
+                })
               }
             >
               <Image
@@ -142,7 +145,11 @@ export default function App({ navigation, route }) {
             height: 69
           }}
           onPress={() =>
-            navigation.navigate("API_Screen_03", { name: name, dataJob: jobs,idJob:"" })
+            navigation.navigate("API_Screen_03", {
+              name: name,
+              dataJob: jobs,
+              idJob: ""
+            })
           }
         >
           <Text style={{ fontSize: 50, color: "white", textAlign: "center" }}>

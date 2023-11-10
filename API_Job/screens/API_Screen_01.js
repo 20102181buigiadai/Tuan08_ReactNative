@@ -34,7 +34,6 @@ export default function App({ navigation }) {
   function addUser() {
     //api tự động nhảy số id = id cũ +1
     const newUser = {
-      // id:idold+1
       name: name,
       jobs: []
     };
